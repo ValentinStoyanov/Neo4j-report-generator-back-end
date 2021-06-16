@@ -1,5 +1,6 @@
 package com.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.neo4j.driver.Driver;
@@ -7,13 +8,16 @@ import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.model.Report1Result;
 import com.repository.HistoricoPosicionesRepository;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("HistoricoPosiciones")
 public class HistoricoPosicionesController {
@@ -37,9 +41,10 @@ private final Driver driver ;
     }
 	
 	
-	@PostMapping(path = "report1") 
-	public String[][] report1() {
+	@GetMapping(path = "report1") 
+	public List<Report1Result> report1() {
 
+		//Porcentaje de posiciones incorrectas por ecu en el ultimo trimestre longitud 1000
 		Result res;
 		
 		try (Session session = driver.session()) { 
@@ -55,21 +60,26 @@ private final Driver driver ;
 			
 			List<Record> myRecords = res.list();
 			
-			int iter = 0;
-			String [][] myArray = new String[myRecords.size()][2];
+			List<Report1Result> finalList = new ArrayList<Report1Result>();
+			
+			String ecu = "";
+			String percentage = "";
+			
 			for( Record record: myRecords){
-			   myArray[iter][0] = record.get("ecu").toString();
-			   myArray[iter][1] = record.get("percetage").toString();
-			   iter++;
+				
+			   ecu = record.get("ecu").toString();
+			   percentage = record.get("percetage").toString();
+			   finalList.add(new Report1Result(ecu,percentage));
 			}
 			
-			return  myArray;
+			return  finalList;
 		}
 	}
 	
-	@PostMapping(path = "report2") 
-	public String[][] report2() {
-		
+	@GetMapping(path = "report2") 
+	public List<Report1Result> report2() {
+	
+	//Porcentaje medio de combustible cada vehiculo
 	Result res;
 		
 		try (Session session = driver.session()) { 
@@ -77,17 +87,22 @@ private final Driver driver ;
 					+ "RETURN x.ecu AS ecu, AVG(x.nivelFuel1) AS percentage\r\n"
 					+ "ORDER BY x.ecu");
 			
+			String ecu = "";
+			String percentage = "";
 			
 			List<Record> myRecords = res.list();
+			
+			List<Report1Result> finalList = new ArrayList<Report1Result>();
 			
 			int iter = 0;
 			String [][] myArray = new String[myRecords.size()][2];
 			for( Record record: myRecords){
-			   myArray[iter][0] = record.get("ecu").toString();
-			   myArray[iter][1] = record.get("percentage").toString();
-			   iter++;
+			   ecu = record.get("ecu").toString();
+			   percentage = record.get("percentage").toString();
+			   finalList.add(new Report1Result(ecu,percentage));
+			   
 			}
-			return myArray;
+			return finalList;
 		}
 	}
 	
