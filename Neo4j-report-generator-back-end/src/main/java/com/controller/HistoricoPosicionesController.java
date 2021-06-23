@@ -26,7 +26,7 @@ public class HistoricoPosicionesController {
 	private HistoricoPosicionesRepository repo;
 	
 	
-private final Driver driver ; 
+	private final Driver driver ; 
 
 	
 	public HistoricoPosicionesController(Driver driver) { 
